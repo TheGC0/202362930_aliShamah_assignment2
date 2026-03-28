@@ -102,6 +102,26 @@ const websiteSchema = {
   url: siteConfig.url,
 };
 
+const scrollRevealScript = `
+(function () {
+  try {
+    if (!('IntersectionObserver' in window)) return;
+    document.documentElement.classList.add('js-scroll');
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(function (el) {
+      observer.observe(el);
+    });
+  } catch (e) {}
+})();
+`;
+
 const themeInitScript = `
 (function () {
   try {
@@ -129,6 +149,9 @@ export default function RootLayout({
       <body className={`${sora.variable} ${ibmPlexMono.variable} antialiased`}>
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
+        </Script>
+        <Script id="scroll-reveal" strategy="afterInteractive">
+          {scrollRevealScript}
         </Script>
 
         <a

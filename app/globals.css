@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
-:root {
+/* Light theme — default and explicit [data-theme="light"] override share one rule block */
+:root,
+:root[data-theme="light"] {
+  /* Font variable fallback (Next.js injects the real value via a utility class at runtime) */
+  --font-sora: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --font-ibm-plex-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
   --page-gradient: radial-gradient(circle at 20% 10%, #efefef 0%, #f8f8f8 46%, #e6e6e6 100%);
   --bg: #f3f3f3;
   --surface: #ffffffcc;
@@ -20,8 +26,9 @@
   --role-glow: rgba(142, 150, 165, 0.42);
 }
 
+/* Dark theme — system preference (no-JS fallback) and explicit [data-theme="dark"] override share one rule block */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --page-gradient: radial-gradient(circle at 20% 10%, #1f1f1f 0%, #101010 45%, #080808 100%);
     --bg: #080808;
     --surface: #151515cc;
@@ -40,26 +47,6 @@
     --role-end: #b6bcc9;
     --role-glow: rgba(229, 236, 248, 0.58);
   }
-}
-
-:root[data-theme="light"] {
-  --page-gradient: radial-gradient(circle at 20% 10%, #efefef 0%, #f8f8f8 46%, #e6e6e6 100%);
-  --bg: #f3f3f3;
-  --surface: #ffffffcc;
-  --surface-subtle: #f5f5f5;
-  --text: #111111;
-  --muted: #525252;
-  --border: #d4d4d4;
-  --accent: #111111;
-  --accent-soft: #a3a3a366;
-  --ring: #737373;
-  --shadow-soft: 0 10px 28px rgba(20, 20, 20, 0.08);
-  --shadow-hover: 0 18px 42px rgba(20, 20, 20, 0.14);
-  --header-bg: #f5f5f5;
-  --role-start: #4a4f58;
-  --role-mid: #8f96a5;
-  --role-end: #4a4f58;
-  --role-glow: rgba(142, 150, 165, 0.42);
 }
 
 :root[data-theme="dark"] {
@@ -252,4 +239,50 @@ a {
   .role-switch-track {
     min-width: 0;
   }
+}
+
+/* ─── Scroll-reveal ─────────────────────────────────────────────────────── */
+/* The .js-scroll class is added by the IntersectionObserver script once JS  */
+/* is available, so content stays visible when JS is disabled or slow.       */
+
+.js-scroll .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.js-scroll .reveal.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-scroll .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ─── Form feedback animations ───────────────────────────────────────────── */
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-field-error {
+  animation: fade-in-down 0.2s ease both;
+}
+
+.form-banner {
+  animation: fade-in-down 0.3s ease both;
 }

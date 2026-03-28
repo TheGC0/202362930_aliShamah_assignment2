@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { GitHubStats } from "@/components/github-stats";
 import { HeroRoleRotator } from "@/components/hero-role-rotator";
 import { ProjectCard } from "@/components/project-card";
 import { SkillGroup } from "@/components/skill-group";
@@ -104,7 +105,7 @@ export default function HomePage() {
         />
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <article className="glass-panel rounded-2xl p-6">
+          <article className="reveal glass-panel rounded-2xl p-6">
             <h3 className="text-xl font-semibold text-[var(--text)]">Profile</h3>
             <p className="mt-4 leading-relaxed text-[var(--muted)]">
               I am a Computer Science student at KFUPM and an active full-stack
@@ -118,7 +119,7 @@ export default function HomePage() {
             </p>
           </article>
 
-          <article className="glass-panel rounded-2xl p-6">
+          <article className="reveal glass-panel rounded-2xl p-6" style={{ transitionDelay: "120ms" }}>
             <h3 className="text-xl font-semibold text-[var(--text)]">Education</h3>
             <p className="mt-4 text-sm text-[var(--muted)]">{education.school}</p>
             <p className="mt-2 text-sm font-medium text-[var(--text)]">{education.degree}</p>
@@ -139,6 +140,10 @@ export default function HomePage() {
             </ul>
           </article>
         </div>
+
+        <div className="reveal" style={{ transitionDelay: "60ms" }}>
+          <GitHubStats username="TheGC0" />
+        </div>
       </section>
 
       <section id="featured-projects" className="section-anchor-offset space-y-8">
@@ -156,7 +161,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-3">
+        <div className="reveal grid gap-6 xl:grid-cols-3">
           {featuredProjects.slice(0, 3).map((project, index) => (
             <ProjectCard key={project.slug} project={project} priority={index === 0} />
           ))}
@@ -169,7 +174,7 @@ export default function HomePage() {
           title="Professional timeline"
           description="Project-based engineering and freelance delivery across product, operations, and automation domains."
         />
-        <div className="space-y-4">
+        <div className="reveal space-y-4">
           {experienceTimeline.map((entry) => (
             <TimelineItem
               key={`${entry.organization}-${entry.period}`}
@@ -188,7 +193,7 @@ export default function HomePage() {
           title="Core tools and capabilities"
           description="A practical stack across frontend/mobile, backend infrastructure, and applied machine learning."
         />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="reveal grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {skillGroups.map((group) => (
             <SkillGroup key={group.title} title={group.title} skills={group.skills} />
           ))}
@@ -201,7 +206,7 @@ export default function HomePage() {
           title="Leading teams and supporting organizations"
           description="Hands-on leadership experience in event technology and committee operations."
         />
-        <div className="space-y-4">
+        <div className="reveal space-y-4">
           {leadership.map((entry) => (
             <TimelineItem
               key={`${entry.organization}-${entry.period}`}
@@ -221,7 +226,7 @@ export default function HomePage() {
           description="For collaborations, project inquiries, or technical opportunities, reach out directly or use the contact page form."
         />
 
-        <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+        <div className="reveal grid gap-6 lg:grid-cols-[1.3fr_1fr]">
           <article className="glass-panel rounded-2xl p-6">
             <h3 className="text-xl font-semibold text-[var(--text)]">Direct contact</h3>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">

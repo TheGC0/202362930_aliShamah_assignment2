@@ -36,16 +36,21 @@ export function ProjectsClient({ initialProjects }: ProjectsClientProps) {
         <label htmlFor="project-search" className="text-sm font-medium text-[var(--text)]">
           Search projects
         </label>
+        <p className="mt-0.5 text-xs text-[var(--muted)]">
+          Type a keyword to filter by project name or technology tag. Results update as you type.
+        </p>
         <input
           id="project-search"
           name="project-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by project name or tag"
+          placeholder="e.g. Flutter, Firebase, AI…"
+          aria-describedby="project-search-hint"
           className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
         />
 
-        <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Project categories">
+        <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by category">
+          <span id="project-search-hint" className="text-xs text-[var(--muted)]">Filter by category:</span>
           {projectCategories.map((category) => {
             const isActive = activeCategory === category;
 
