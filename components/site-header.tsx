@@ -4,7 +4,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { siteConfig } from "@/data/site";
 
@@ -37,6 +37,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>(homeSectionLinks[0].id);
+  const scrollFrameRef = useRef<number | null>(null);
 
   const isHome = pathname === "/";
 
@@ -69,26 +70,59 @@ export function SiteHeader() {
       return;
     }
 
-    // Track the most visible home section to keep nav highlight in sync while scrolling.
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+    const getHeaderOffset = () => {
+      const header = document.querySelector("header");
+      return header instanceof HTMLElement ? header.offsetHeight : 0;
+    };
 
-        if (visibleEntries.length > 0) {
-          setActiveSection(visibleEntries[0].target.id);
+    const updateActiveSection = () => {
+      const headerOffset = getHeaderOffset();
+      const activationPoint =
+        window.scrollY + headerOffset + Math.min(window.innerHeight * 0.35, 280);
+
+      let currentSectionId = sectionElements[0].id;
+
+      for (const section of sectionElements) {
+        const top = section.offsetTop;
+
+        if (activationPoint >= top) {
+          currentSectionId = section.id;
+        } else {
+          break;
         }
-      },
-      {
-        rootMargin: "-30% 0px -55% 0px",
-        threshold: [0.2, 0.45, 0.7],
-      },
-    );
+      }
 
-    sectionElements.forEach((section) => observer.observe(section));
+      setActiveSection((previous) =>
+        previous === currentSectionId ? previous : currentSectionId,
+      );
+    };
 
-    return () => observer.disconnect();
+    const scheduleUpdate = () => {
+      if (scrollFrameRef.current !== null) {
+        return;
+      }
+
+      scrollFrameRef.current = window.requestAnimationFrame(() => {
+        scrollFrameRef.current = null;
+        updateActiveSection();
+      });
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("hashchange", scheduleUpdate);
+
+    return () => {
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
+
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("hashchange", scheduleUpdate);
+    };
   }, [isHome]);
 
   return (

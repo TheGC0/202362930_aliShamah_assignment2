@@ -187,8 +187,8 @@ export const projects: Project[] = [
     subtitle: "ML-backed loan estimation service for real estate funding",
     impact:
       "Built an ML inference API for loan estimation using scikit-learn models and FastAPI deployment to support product decisioning workflows.",
-    image: "/projects/mdar-loan-api.png",
-    gallery: ["/projects/mdar-loan-api.png", "/projects/mdar-loan-api-detail.png"],
+    image: "/mdar_1.png",
+    gallery: ["/mdar_1.png", "/mdar_2.png"],
     featured: false,
     categories: ["AI/ML", "Full-Stack"],
     tags: ["FastAPI", "scikit-learn", "Ridge", "HistGradientBoostingRegressor"],
@@ -232,8 +232,9 @@ export const projects: Project[] = [
     subtitle: "Supermarket price comparison app",
     impact:
       "Created a practical price comparison experience to help users evaluate product options across supermarkets in one interface.",
+    brandLogo: "/mqadi_cart.svg",
     image: "/projects/mqadi.png",
-    gallery: ["/projects/mqadi.png", "/projects/mqadi-detail.png"],
+    gallery: [],
     featured: false,
     categories: ["Mobile", "Full-Stack"],
     tags: ["Mobile/Web", "Comparison", "UX", "Product Discovery"],
@@ -275,8 +276,8 @@ export const projects: Project[] = [
     subtitle: "Realtime POS dashboard for order and kitchen workflows",
     impact:
       "Delivered a web POS solution with Firestore realtime updates across order, kitchen, and analytics interfaces.",
-    image: "/projects/karfeshha-pos.png",
-    gallery: ["/projects/karfeshha-pos.png", "/projects/karfeshha-pos-detail.png"],
+    image: "/karfeshha_1.png",
+    gallery: ["/karfeshha_1.png", "/karfeshha_2.png"],
     featured: false,
     categories: ["Full-Stack", "Dashboards"],
     tags: ["POS", "Firestore Realtime", "Order Management", "Analytics"],
