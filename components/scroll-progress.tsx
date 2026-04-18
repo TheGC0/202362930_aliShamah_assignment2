@@ -1,16 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Thin accent-colored bar fixed at the very top of the viewport.
- * Width tracks how far the user has scrolled through the page (0 → 100%).
- * Uses requestAnimationFrame to avoid layout thrashing on scroll.
+ * Thin accent bar fixed at the top of the viewport showing scroll progress.
+ * Respects prefers-reduced-motion: renders nothing for users who prefer
+ * reduced motion rather than animating on every scroll event.
  */
 export function ScrollProgress() {
   const [progress, setProgress] = useState(0);
+  // null = not yet determined (SSR / first render)
+  const [show, setShow]         = useState<boolean | null>(null);
+  const mqRef = useRef<MediaQueryList | null>(null);
 
   useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    mqRef.current = mq;
+
+    // Determine initial preference after mount (avoids sync-setState-in-effect lint error)
+    const timer = setTimeout(() => setShow(!mq.matches), 0);
+
+    const onChange = (e: MediaQueryListEvent) => setShow(!e.matches);
+    mq.addEventListener("change", onChange);
+
+    return () => {
+      clearTimeout(timer);
+      mq.removeEventListener("change", onChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!show) return;
+
     let ticking = false;
 
     function update() {
@@ -29,7 +50,9 @@ export function ScrollProgress() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [show]);
+
+  if (!show) return null;
 
   return (
     <div

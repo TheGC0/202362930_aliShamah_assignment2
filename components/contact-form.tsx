@@ -20,6 +20,12 @@ const STORAGE_KEY       = "contact-form-name";
 const DRAFT_STORAGE_KEY = "contact-form-draft";
 const MAX_MESSAGE       = 500;
 
+// Defined outside the component so they are not re-created on every render
+const INPUT_BASE =
+  "mt-2 w-full rounded-xl border px-4 py-3 text-sm text-[var(--text)] bg-[var(--surface-subtle)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]";
+const INPUT_OK  = "border-[var(--border)]";
+const INPUT_ERR = "border-red-500";
+
 type DraftData = { name: string; email: string; subject: string; message: string };
 
 /* ── Validation ──────────────────────────────────────────────────────────── */
@@ -67,7 +73,7 @@ function StepIndicator({ current }: { current: Step }) {
           <div className="flex flex-col items-center gap-1">
             <span
               aria-current={current === step.num ? "step" : undefined}
-              className={`flex h-7 w-7 items-center justify-content-center items-center justify-center rounded-full text-xs font-bold transition ${
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition ${
                 current > step.num
                   ? "bg-[var(--accent)] text-white"
                   : current === step.num
@@ -192,13 +198,6 @@ export function ContactForm() {
     }
   }
 
-  /* ── Shared input styles ─────────────────────────────────────────────── */
-
-  const inputBase =
-    "mt-2 w-full rounded-xl border px-4 py-3 text-sm text-[var(--text)] bg-[var(--surface-subtle)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]";
-  const inputOk  = "border-[var(--border)]";
-  const inputErr = "border-red-500";
-
   const msgLen = message.trim().length;
 
   return (
@@ -256,7 +255,7 @@ export function ContactForm() {
               onChange={(e) => handleNameChange(e.target.value)}
               aria-describedby={errors.name ? "cf-name-error" : "cf-name-hint"}
               aria-invalid={!!errors.name}
-              className={`${inputBase} ${errors.name ? inputErr : inputOk}`}
+              className={`${INPUT_BASE} ${errors.name ? INPUT_ERR : INPUT_OK}`}
             />
             {errors.name ? (
               <p id="cf-name-error" role="alert" className="mt-1.5 text-xs text-red-500">
@@ -288,7 +287,7 @@ export function ContactForm() {
               }}
               aria-describedby={errors.email ? "cf-email-error" : undefined}
               aria-invalid={!!errors.email}
-              className={`${inputBase} ${errors.email ? inputErr : inputOk}`}
+              className={`${INPUT_BASE} ${errors.email ? INPUT_ERR : INPUT_OK}`}
             />
             {errors.email && (
               <p id="cf-email-error" role="alert" className="mt-1.5 text-xs text-red-500">
@@ -330,8 +329,12 @@ export function ContactForm() {
               placeholder="Project inquiry, collaboration…"
               value={subject}
               onChange={(e) => { setSubject(e.target.value); saveDraft({ subject: e.target.value }); }}
-              className={`${inputBase} ${inputOk}`}
+              aria-describedby="cf-subject-hint"
+              className={`${INPUT_BASE} ${INPUT_OK}`}
             />
+            <p id="cf-subject-hint" className="mt-1 text-xs text-[var(--muted)]">
+              Optional — leave blank to use a default subject.
+            </p>
           </div>
 
           {/* Message */}
@@ -365,7 +368,7 @@ export function ContactForm() {
               }}
               aria-describedby={errors.message ? "cf-message-error" : "cf-message-hint"}
               aria-invalid={!!errors.message}
-              className={`${inputBase} ${errors.message ? inputErr : inputOk}`}
+              className={`${INPUT_BASE} ${errors.message ? INPUT_ERR : INPUT_OK}`}
             />
             {errors.message ? (
               <p id="cf-message-error" role="alert" className="mt-1.5 text-xs text-red-500">
