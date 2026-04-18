@@ -1,15 +1,47 @@
-# Ali Shamah — Portfolio (Assignment 1 + 2)
+# Ali Shamah — Portfolio (Assignments 1, 2 & 3)
 
 Professional, responsive personal portfolio built with Next.js + TypeScript.
 
-This implementation is intentionally above the minimum assignment baseline while covering every required item for both assignments.
+Live: https://ali-shamah-portfolio.vercel.app
 
 ## Live Overview
 - Main page sections: About, Featured Projects, Experience, Skills, Leadership, Contact
 - Dedicated pages: Projects, Project Details, Links Hub, Resume, Contact
-- Theme toggle + interactive project search/filter
-- GitHub live stats via public API
-- Validated contact form with animated feedback
+- Dark/light theme toggle with localStorage persistence
+- GitHub live stats via public API + Quotable.io inspirational quotes
+- Project search, category filter, and sort
+- 3-step validated contact form
+- Visitor time-on-page counter
+
+---
+
+## Assignment 3 — Advanced Functionality
+
+### 1) API Integration
+- **GitHub REST API** (existing, enhanced): Fetches live profile stats (`public_repos`, `followers`, `following`) and repository list — `components/github-stats.tsx`
+- **Quotable.io API** (new): Fetches a random inspirational/technology quote on page load with a ↺ refresh button. Falls back to 4 hardcoded quotes when offline or rate-limited — `components/quote-widget.tsx`
+- Both APIs display user-friendly error states when unavailable.
+
+### 2) Complex Logic
+- **Project filter + sort**: Search by keyword (title/tag/subtitle) AND filter by category AND sort by newest/oldest/A→Z/Z→A — all applied together in `useMemo` — `components/projects-client.tsx`
+- **3-step contact form wizard**: Step 1 validates name (required) + email (regex); Step 2 validates message (required, 10–500 chars); Step 3 shows a read-only review before submission — `components/contact-form.tsx`
+
+### 3) State Management
+- **Multi-step form state**: Current step (`1 | 2 | 3`), field values, and per-step errors all tracked in React state
+- **Visitor name** in localStorage: name saved from contact form, restored on next visit
+- **Dark/light theme** in localStorage: persisted across sessions, applied before first paint (no flash)
+- **Visitor timer**: Time spent on the current page displayed in the hero section, updating every second — `components/visitor-timer.tsx`
+
+### 4) Performance
+- `useMemo` on filter+sort pipeline — recalculates only when query, category, or sort changes
+- `dynamic({ ssr: false })` for the visitor timer — prevents SSR/hydration mismatch
+- `Promise.all` for parallel GitHub profile + repos fetches
+- `IntersectionObserver` for scroll-reveal (no scroll event listeners)
+- `aria-live="off"` on timer — avoids disruptive screen reader announcements every second
+
+### 5) AI Integration
+- Claude Code (Anthropic) used for code generation, debugging (caught `ssr: false` in Server Component error), and architecture suggestions
+- Full details: `docs/ai-usage-report.md` — Assignment 3 section
 
 ---
 
@@ -94,10 +126,13 @@ portfolio/
 |   |-- resume/
 |   `-- links/
 |-- components/
-|   |-- contact-form.tsx      Validated form with animated feedback + localStorage
-|   |-- github-stats.tsx      GitHub public API fetch with loading/error states
-|   |-- hero-role-rotator.tsx Animated role text
-|   |-- projects-client.tsx   Search + filter with empty state
+|   |-- contact-form.tsx           3-step wizard with per-step validation + localStorage
+|   |-- github-stats.tsx           GitHub public API fetch with loading/error states
+|   |-- hero-role-rotator.tsx      Animated role text
+|   |-- projects-client.tsx        Search + category filter + sort with results count
+|   |-- quote-widget.tsx           Quotable.io API fetch with fallback + refresh
+|   |-- visitor-timer.tsx          Time-on-page counter (client-only)
+|   |-- visitor-timer-dynamic.tsx  SSR-safe dynamic wrapper for visitor timer
 |   |-- site-header.tsx
 |   `-- ...
 |-- data/
