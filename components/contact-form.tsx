@@ -4,97 +4,169 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { siteConfig } from "@/data/site";
 
+/* ── Types ───────────────────────────────────────────────────────────────── */
+
+type Step = 1 | 2 | 3;
+
 type FieldErrors = {
-  name?: string;
-  email?: string;
+  name?:    string;
+  email?:   string;
   message?: string;
 };
 
 type SubmitStatus = "idle" | "submitting" | "sent" | "error";
 
 const STORAGE_KEY = "contact-form-name";
+const MAX_MESSAGE = 500;
+
+/* ── Validation ──────────────────────────────────────────────────────────── */
 
 function validateEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function validate(name: string, email: string, message: string): FieldErrors {
+function validateStep1(name: string, email: string): FieldErrors {
   const errors: FieldErrors = {};
-  if (!name.trim()) {
-    errors.name = "Name is required.";
-  }
+  if (!name.trim())  errors.name  = "Name is required.";
   if (!email.trim()) {
     errors.email = "Email is required.";
   } else if (!validateEmail(email.trim())) {
     errors.email = "Enter a valid email address.";
   }
+  return errors;
+}
+
+function validateStep2(message: string): FieldErrors {
+  const errors: FieldErrors = {};
   if (!message.trim()) {
     errors.message = "Message is required.";
   } else if (message.trim().length < 10) {
     errors.message = "Message must be at least 10 characters.";
+  } else if (message.trim().length > MAX_MESSAGE) {
+    errors.message = `Message must be ${MAX_MESSAGE} characters or fewer.`;
   }
   return errors;
 }
 
-export function ContactForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [status, setStatus] = useState<SubmitStatus>("idle");
+/* ── Step indicator sub-component ───────────────────────────────────────── */
 
-  // Restore name from localStorage on mount (client-only, safe to read after hydration)
+function StepIndicator({ current }: { current: Step }) {
+  const steps = [
+    { num: 1, label: "You" },
+    { num: 2, label: "Message" },
+    { num: 3, label: "Review" },
+  ] as const;
+
+  return (
+    <div className="mb-6 flex items-center" aria-label="Form progress">
+      {steps.map((step, idx) => (
+        <div key={step.num} className="flex items-center">
+          <div className="flex flex-col items-center gap-1">
+            <span
+              aria-current={current === step.num ? "step" : undefined}
+              className={`flex h-7 w-7 items-center justify-content-center items-center justify-center rounded-full text-xs font-bold transition ${
+                current > step.num
+                  ? "bg-[var(--accent)] text-white"
+                  : current === step.num
+                  ? "bg-[var(--accent)] text-white ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--surface)]"
+                  : "border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--muted)]"
+              }`}
+            >
+              {current > step.num ? "✓" : step.num}
+            </span>
+            <span
+              className={`text-xs font-medium ${
+                current === step.num ? "text-[var(--accent)]" : "text-[var(--muted)]"
+              }`}
+            >
+              {step.label}
+            </span>
+          </div>
+          {idx < steps.length - 1 && (
+            <div
+              className={`mx-2 mb-5 h-px w-10 transition sm:w-16 ${
+                current > step.num ? "bg-[var(--accent)]" : "bg-[var(--border)]"
+              }`}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Main component ──────────────────────────────────────────────────────── */
+
+export function ContactForm() {
+  const [step,    setStep]    = useState<Step>(1);
+  const [name,    setName]    = useState("");
+  const [email,   setEmail]   = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [errors,  setErrors]  = useState<FieldErrors>({});
+  const [status,  setStatus]  = useState<SubmitStatus>("idle");
+
+  // Restore saved name from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setName(saved);
-    } catch {
-      // localStorage unavailable — silently continue
-    }
+    } catch { /* localStorage unavailable */ }
   }, []);
 
+  // Persist name to localStorage as user types
   const handleNameChange = (value: string) => {
     setName(value);
     if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
     try {
-      if (value.trim()) {
-        localStorage.setItem(STORAGE_KEY, value.trim());
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    } catch {
-      // localStorage unavailable — silently continue
-    }
+      if (value.trim()) localStorage.setItem(STORAGE_KEY, value.trim());
+      else              localStorage.removeItem(STORAGE_KEY);
+    } catch { /* localStorage unavailable */ }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  /* ── Step navigation ─────────────────────────────────────────────────── */
 
-    const fieldErrors = validate(name, email, message);
-    if (Object.keys(fieldErrors).length > 0) {
-      setErrors(fieldErrors);
-      return;
+  function goNext() {
+    if (step === 1) {
+      const errs = validateStep1(name, email);
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setErrors({});
+      setStep(2);
+    } else if (step === 2) {
+      const errs = validateStep2(message);
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setErrors({});
+      setStep(3);
     }
+  }
 
+  function goBack() {
     setErrors({});
-    setStatus("submitting");
+    setStep((s) => (s > 1 ? (s - 1) as Step : s));
+  }
 
+  /* ── Submission ──────────────────────────────────────────────────────── */
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus("submitting");
     try {
-      const subject = encodeURIComponent(`Portfolio inquiry from ${name.trim()}`);
+      const sub  = encodeURIComponent(subject.trim() || `Portfolio inquiry from ${name.trim()}`);
       const body = encodeURIComponent(
         `Name: ${name.trim()}\nEmail: ${email.trim()}\n\nMessage:\n${message.trim()}`,
       );
-      window.location.href = `mailto:${siteConfig.email}?subject=${subject}&body=${body}`;
+      window.location.href = `mailto:${siteConfig.email}?subject=${sub}&body=${body}`;
       setStatus("sent");
     } catch {
       setStatus("error");
     }
-  };
+  }
+
+  /* ── Shared input styles ─────────────────────────────────────────────── */
 
   const inputBase =
     "mt-2 w-full rounded-xl border px-4 py-3 text-sm text-[var(--text)] bg-[var(--surface-subtle)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]";
-  const inputOk = "border-[var(--border)]";
+  const inputOk  = "border-[var(--border)]";
   const inputErr = "border-red-500";
 
   const msgLen = message.trim().length;
@@ -104,155 +176,238 @@ export function ContactForm() {
       onSubmit={handleSubmit}
       noValidate
       aria-label="Contact form"
-      className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]"
+      className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]"
     >
-      {/* How it works */}
-      <p className="text-xs leading-relaxed text-[var(--muted)]">
-        Fill in your details below and click <strong className="text-[var(--text)]">Send message</strong>.
-        Your email app will open with a pre-filled draft — just review and hit send.
-      </p>
+      <StepIndicator current={step} />
 
-      {/* Name */}
-      <div>
-        <label htmlFor="cf-name" className="text-sm font-medium text-[var(--text)]">
-          Name <span aria-hidden="true" className="text-red-500">*</span>
-        </label>
-        <input
-          id="cf-name"
-          name="name"
-          autoComplete="name"
-          placeholder="Your full name"
-          value={name}
-          onChange={(e) => handleNameChange(e.target.value)}
-          aria-describedby={errors.name ? "cf-name-error" : "cf-name-hint"}
-          aria-invalid={!!errors.name}
-          className={`${inputBase} ${errors.name ? inputErr : inputOk}`}
-        />
-        {errors.name ? (
-          <p id="cf-name-error" role="alert" className="form-field-error mt-1.5 text-xs text-red-500">
-            {errors.name}
-          </p>
-        ) : (
-          <p id="cf-name-hint" className="mt-1 text-xs text-[var(--muted)]">
-            Saved automatically for your next visit.
-          </p>
-        )}
-      </div>
+      {/* ── Step 1: Identity ─────────────────────────────────────────── */}
+      {step === 1 && (
+        <fieldset className="space-y-4 border-none p-0">
+          <legend className="sr-only">Your information</legend>
 
-      {/* Email */}
-      <div>
-        <label htmlFor="cf-email" className="text-sm font-medium text-[var(--text)]">
-          Email <span aria-hidden="true" className="text-red-500">*</span>
-        </label>
-        <input
-          id="cf-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
-          }}
-          aria-describedby={errors.email ? "cf-email-error" : undefined}
-          aria-invalid={!!errors.email}
-          className={`${inputBase} ${errors.email ? inputErr : inputOk}`}
-        />
-        {errors.email ? (
-          <p id="cf-email-error" role="alert" className="form-field-error mt-1.5 text-xs text-red-500">
-            {errors.email}
+          <p className="text-xs leading-relaxed text-[var(--muted)]">
+            Start by telling me a bit about yourself.
           </p>
-        ) : null}
-      </div>
 
-      {/* Message */}
-      <div>
-        <div className="flex items-baseline justify-between">
-          <label htmlFor="cf-message" className="text-sm font-medium text-[var(--text)]">
-            Message <span aria-hidden="true" className="text-red-500">*</span>
-          </label>
-          <span className={`text-xs ${msgLen > 0 && msgLen < 10 ? "text-red-500" : "text-[var(--muted)]"}`}>
-            {msgLen} / 10 min
-          </span>
-        </div>
-        <textarea
-          id="cf-message"
-          name="message"
-          rows={6}
-          placeholder="What would you like to discuss? Projects, collaborations, or opportunities…"
-          value={message}
-          onChange={(e) => {
-            setMessage(e.target.value);
-            if (errors.message) setErrors((prev) => ({ ...prev, message: undefined }));
-          }}
-          aria-describedby={errors.message ? "cf-message-error" : "cf-message-hint"}
-          aria-invalid={!!errors.message}
-          className={`${inputBase} ${errors.message ? inputErr : inputOk}`}
-        />
-        {errors.message ? (
-          <p id="cf-message-error" role="alert" className="form-field-error mt-1.5 text-xs text-red-500">
-            {errors.message}
-          </p>
-        ) : (
-          <p id="cf-message-hint" className="mt-1 text-xs text-[var(--muted)]">
-            Minimum 10 characters. Be as brief or detailed as you like.
-          </p>
-        )}
-      </div>
+          {/* Name */}
+          <div>
+            <label htmlFor="cf-name" className="text-sm font-medium text-[var(--text)]">
+              Name <span aria-hidden="true" className="text-red-500">*</span>
+            </label>
+            <input
+              id="cf-name"
+              name="name"
+              autoComplete="name"
+              placeholder="Your full name"
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              aria-describedby={errors.name ? "cf-name-error" : "cf-name-hint"}
+              aria-invalid={!!errors.name}
+              className={`${inputBase} ${errors.name ? inputErr : inputOk}`}
+            />
+            {errors.name ? (
+              <p id="cf-name-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                {errors.name}
+              </p>
+            ) : (
+              <p id="cf-name-hint" className="mt-1 text-xs text-[var(--muted)]">
+                Saved for your next visit.
+              </p>
+            )}
+          </div>
 
-      {/* Submit */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          disabled={status === "submitting"}
-          className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {status === "submitting" ? "Opening email…" : "Send message"}
-        </button>
-        <p className="text-xs text-[var(--muted)]">Fields marked <span aria-hidden="true" className="text-red-500">*</span> are required.</p>
-      </div>
+          {/* Email */}
+          <div>
+            <label htmlFor="cf-email" className="text-sm font-medium text-[var(--text)]">
+              Email <span aria-hidden="true" className="text-red-500">*</span>
+            </label>
+            <input
+              id="cf-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+              }}
+              aria-describedby={errors.email ? "cf-email-error" : undefined}
+              aria-invalid={!!errors.email}
+              className={`${inputBase} ${errors.email ? inputErr : inputOk}`}
+            />
+            {errors.email && (
+              <p id="cf-email-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                {errors.email}
+              </p>
+            )}
+          </div>
 
-      {/* Success banner */}
-      {status === "sent" ? (
-        <div
-          role="status"
-          className="form-banner rounded-xl border border-green-500/30 bg-green-500/10 p-4"
-        >
-          <p className="text-sm font-medium text-green-700 dark:text-green-400">
-            Email draft opened — just hit send in your email app!
+          <button
+            type="button"
+            onClick={goNext}
+            className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+          >
+            Next →
+          </button>
+        </fieldset>
+      )}
+
+      {/* ── Step 2: Message ──────────────────────────────────────────── */}
+      {step === 2 && (
+        <fieldset className="space-y-4 border-none p-0">
+          <legend className="sr-only">Your message</legend>
+
+          <p className="text-xs leading-relaxed text-[var(--muted)]">
+            What would you like to discuss?
           </p>
-          <p className="mt-1 text-xs text-[var(--muted)]">
-            Nothing opened? Email directly:{" "}
-            <a
-              href={`mailto:${siteConfig.email}`}
-              className="underline hover:text-[var(--text)]"
+
+          {/* Subject (optional) */}
+          <div>
+            <label htmlFor="cf-subject" className="text-sm font-medium text-[var(--text)]">
+              Subject <span className="text-[var(--muted)]">(optional)</span>
+            </label>
+            <input
+              id="cf-subject"
+              name="subject"
+              placeholder="Project inquiry, collaboration…"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className={`${inputBase} ${inputOk}`}
+            />
+          </div>
+
+          {/* Message */}
+          <div>
+            <div className="flex items-baseline justify-between">
+              <label htmlFor="cf-message" className="text-sm font-medium text-[var(--text)]">
+                Message <span aria-hidden="true" className="text-red-500">*</span>
+              </label>
+              <span
+                className={`text-xs ${
+                  msgLen > MAX_MESSAGE
+                    ? "text-red-500"
+                    : msgLen > 0 && msgLen < 10
+                    ? "text-red-500"
+                    : "text-[var(--muted)]"
+                }`}
+              >
+                {msgLen} / {MAX_MESSAGE}
+              </span>
+            </div>
+            <textarea
+              id="cf-message"
+              name="message"
+              rows={6}
+              placeholder="What would you like to discuss? Projects, collaborations, or opportunities…"
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (errors.message) setErrors((prev) => ({ ...prev, message: undefined }));
+              }}
+              aria-describedby={errors.message ? "cf-message-error" : "cf-message-hint"}
+              aria-invalid={!!errors.message}
+              className={`${inputBase} ${errors.message ? inputErr : inputOk}`}
+            />
+            {errors.message ? (
+              <p id="cf-message-error" role="alert" className="mt-1.5 text-xs text-red-500">
+                {errors.message}
+              </p>
+            ) : (
+              <p id="cf-message-hint" className="mt-1 text-xs text-[var(--muted)]">
+                10–{MAX_MESSAGE} characters.
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={goBack}
+              className="rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--text)] transition hover:-translate-y-0.5 hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             >
-              {siteConfig.email}
-            </a>
-          </p>
-        </div>
-      ) : null}
-
-      {/* Error banner */}
-      {status === "error" ? (
-        <div
-          role="alert"
-          className="form-banner rounded-xl border border-red-500/30 bg-red-500/10 p-4"
-        >
-          <p className="text-sm font-medium text-red-700 dark:text-red-400">
-            Something went wrong. Please try again or email directly.
-          </p>
-          <p className="mt-1 text-xs text-[var(--muted)]">
-            <a
-              href={`mailto:${siteConfig.email}`}
-              className="underline hover:text-[var(--text)]"
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             >
-              {siteConfig.email}
-            </a>
+              Review →
+            </button>
+          </div>
+        </fieldset>
+      )}
+
+      {/* ── Step 3: Review & send ─────────────────────────────────────── */}
+      {step === 3 && (
+        <fieldset className="space-y-4 border-none p-0">
+          <legend className="sr-only">Review and send</legend>
+
+          <p className="text-xs leading-relaxed text-[var(--muted)]">
+            Check your details before sending. Your email client will open with a pre-filled draft.
           </p>
-        </div>
-      ) : null}
+
+          {/* Summary table */}
+          <dl className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] text-sm">
+            {[
+              { term: "Name",    def: name },
+              { term: "Email",   def: email },
+              { term: "Subject", def: subject || "(none)" },
+              { term: "Message", def: message },
+            ].map(({ term, def }) => (
+              <div key={term} className="flex gap-4 px-4 py-2.5">
+                <dt className="w-20 flex-shrink-0 font-semibold text-[var(--text)]">{term}</dt>
+                <dd className="min-w-0 break-words text-[var(--muted)]">{def}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={goBack}
+              className="rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--text)] transition hover:-translate-y-0.5 hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+            >
+              ← Edit
+            </button>
+            <button
+              type="submit"
+              disabled={status === "submitting"}
+              className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status === "submitting" ? "Opening email…" : "Send message ✉"}
+            </button>
+          </div>
+
+          {/* Success */}
+          {status === "sent" && (
+            <div role="status" className="rounded-xl border border-green-500/30 bg-green-500/10 p-4">
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                Email draft opened — just hit send in your email app!
+              </p>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Nothing opened?{" "}
+                <a href={`mailto:${siteConfig.email}`} className="underline hover:text-[var(--text)]">
+                  {siteConfig.email}
+                </a>
+              </p>
+            </div>
+          )}
+
+          {/* Error */}
+          {status === "error" && (
+            <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+              <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                Something went wrong. Please email directly:{" "}
+                <a href={`mailto:${siteConfig.email}`} className="underline">
+                  {siteConfig.email}
+                </a>
+              </p>
+            </div>
+          )}
+        </fieldset>
+      )}
     </form>
   );
 }

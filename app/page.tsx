@@ -4,9 +4,11 @@ import Link from "next/link";
 import { GitHubStats } from "@/components/github-stats";
 import { HeroRoleRotator } from "@/components/hero-role-rotator";
 import { ProjectCard } from "@/components/project-card";
+import { QuoteWidget } from "@/components/quote-widget";
 import { SkillGroup } from "@/components/skill-group";
 import { TimelineItem } from "@/components/timeline-item";
 import { SectionHeader } from "@/components/ui/section-header";
+import { VisitorTimerDynamic } from "@/components/visitor-timer-dynamic";
 import { featuredProjects } from "@/data/projects";
 import {
   certifications,
@@ -52,6 +54,11 @@ export default function HomePage() {
                 >
                   Contact
                 </Link>
+              </div>
+
+              {/* Visitor timer – shows time spent on the page */}
+              <div className="mt-5">
+                <VisitorTimerDynamic />
               </div>
 
               <div className="mt-4 flex flex-wrap gap-3">
@@ -143,6 +150,11 @@ export default function HomePage() {
 
         <div className="reveal" style={{ transitionDelay: "60ms" }}>
           <GitHubStats username="TheGC0" />
+        </div>
+
+        {/* Quotable.io API – second external API integration */}
+        <div className="reveal" style={{ transitionDelay: "120ms" }}>
+          <QuoteWidget />
         </div>
       </section>
 

@@ -83,3 +83,59 @@ Used as the primary AI assistant for implementing Assignment 2's interactive fea
 - AI support was used transparently for ideation, code generation, and documentation.
 - Final submitted work reflects my own understanding, review, and modifications.
 - AI tools listed accurately above with descriptions of exactly how they were used.
+
+
+---
+
+## Assignment 3
+
+### Tools Used & Use Cases
+
+#### 1) Claude Code (Anthropic — Claude Sonnet 4.6)
+Primary AI assistant for implementing Assignment 3's advanced features.
+
+**Tasks where Claude Code assisted:**
+
+- **Sort functionality in ProjectsClient**: Suggested adding a `SortKey` union type and a `<select>` dropdown alongside the existing category filter. I reviewed the generated sort logic, confirmed `localeCompare` is the right comparator for both date strings (ISO format) and titles, and added the "results count" line and "Clear filters" reset button myself.
+
+- **QuoteWidget component (Quotable.io API)**: Generated the initial fetch pattern with loading skeleton, fallback quotes, and refresh button. I reviewed the error handling, adjusted the API query parameters (`tags`, `maxLength`) to get more relevant quotes, and matched the card styling to the existing `glass-panel` design system.
+
+- **VisitorTimer component**: Suggested the `setInterval` + `useEffect` cleanup pattern. I added the `formatElapsed` function myself (seconds → minutes → hours formatting), chose `aria-live="off"` deliberately (a live-updating timer announced every second would be extremely disruptive to screen reader users), and added the `sr-only` span for context.
+
+- **Multi-step ContactForm**: Suggested the step-state approach (`Step = 1 | 2 | 3`). I designed the `StepIndicator` sub-component layout, wrote the per-step validation functions (`validateStep1`, `validateStep2`) with specific error messages, added the subject field (optional, step 2), and built the review summary `<dl>` table in step 3.
+
+- **`date` field for sort**: I added the `date` field to the `Project` type and assigned dates to all 6 projects based on my knowledge of when each was built. Claude did not know the actual dates.
+
+- **Server Component `dynamic` fix**: Claude initially placed `dynamic({ ssr: false })` in `app/page.tsx` (a Server Component), which caused a build error. It then diagnosed the issue and suggested the `VisitorTimerDynamic` client wrapper pattern, which I implemented.
+
+#### 2) ChatGPT (OpenAI) — reference use
+- Cross-referenced the `aria-live="off"` decision for the timer — confirmed that a timer with frequent updates should not be `polite` or `assertive` to avoid disrupting screen reader users.
+
+### Benefits & Challenges — Assignment 3
+
+**Benefits**
+- The multi-step form refactor was significantly faster with AI assistance — generating the initial structure took minutes rather than the hour it would have taken from scratch.
+- Claude's codebase awareness (reading existing components before generating) meant suggestions already used `var(--accent)`, `var(--border)`, and the existing button class patterns without manual adaptation.
+- Parallel feature development: while I reviewed one AI suggestion, the next could be drafted.
+
+**Challenges**
+- The `dynamic({ ssr: false })` in a Server Component error was caught only at build time, not in the editor. AI suggestions for Next.js App Router patterns should always be verified against the component's rendering context (server vs. client).
+- The Quotable.io API occasionally returns quotes that don't quite fit a tech portfolio. The `tags` filter helps, but the fallback list required careful manual curation.
+- Step 3 "review" panel required several iterations to display `message` without XSS risk — I confirmed that React's JSX escapes text by default (no manual `escapeHtml` needed, unlike the plain HTML version).
+
+### Learning Outcomes — Assignment 3
+- Deeper understanding of Next.js App Router rendering boundaries: `dynamic({ ssr: false })` must be inside a `"use client"` component, not a Server Component.
+- Better grasp of when to use `aria-live` and when to explicitly suppress it (`aria-live="off"`) — accessibility is not just about adding ARIA, it's about not being disruptive.
+- Practical use of `Promise.all` for parallel API calls — fetching profile and repos simultaneously rather than sequentially cut GitHub load time roughly in half.
+- Understanding that sort + filter composition requires immutable operations (`[...results].sort(...)`) to avoid mutating the memoized source array.
+
+### Responsible Use & Modifications
+- All AI-generated code was reviewed, tested against `npm run build`, and modified to fit the project's design system and assignment requirements.
+- The `date` field values, fallback quotes, and accessibility decisions were made by me, not by AI.
+- `npm run lint` and `npm run build` were run after every change to verify correctness.
+- AI was used for scaffolding speed and pattern suggestions — all architectural decisions (component boundaries, state shape, API choice) were made independently.
+
+### Academic Integrity Statement
+- AI support is documented transparently above with precise descriptions of what was generated vs. what was written independently.
+- All submitted code reflects my own understanding, review, and modifications.
+- I can explain every line of code in this project.

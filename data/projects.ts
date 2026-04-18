@@ -20,6 +20,8 @@ export type Project = {
   slug: string;
   title: string;
   subtitle: string;
+  /** ISO date string (YYYY-MM) used for sorting */
+  date: string;
   impact: string;
   brandLogo?: string;
   brandLogoLight?: string;
@@ -44,6 +46,7 @@ export const projects: Project[] = [
   {
     slug: "gaming-plus-platform",
     title: "Gaming+ Platform",
+    date: "2024-08",
     subtitle: "Official event platform for Gaming+ (KFUPM)",
     impact:
       "Delivered a production event website for registration, scheduling, and live updates while leading a 5-person web dev team.",
@@ -90,6 +93,7 @@ export const projects: Project[] = [
   {
     slug: "kirix-management-dashboard",
     title: "Kirix Management Dashboard",
+    date: "2024-03",
     subtitle: "Internal operations suite for KIRIX Media",
     impact:
       "Centralized internal workflows across inventory, orders, accounts, and messages in one dashboard used by operations teams.",
@@ -139,6 +143,7 @@ export const projects: Project[] = [
   {
     slug: "plate-detector",
     title: "Plate Detector",
+    date: "2023-11",
     subtitle: "Computer vision pipeline for plate detection and ticket generation",
     impact:
       "Automated the flow from plate capture to database matching and ticket issuance using hosted YOLO-style inference with OpenCV preprocessing.",
@@ -183,6 +188,7 @@ export const projects: Project[] = [
   },
   {
     slug: "mdar-loan-estimation-api",
+    date: "2023-07",
     title: "Mdar Loan Estimation API",
     subtitle: "ML-backed loan estimation service for real estate funding",
     impact:
@@ -228,6 +234,7 @@ export const projects: Project[] = [
   },
   {
     slug: "mqadi",
+    date: "2023-03",
     title: "Mqadi",
     subtitle: "Supermarket price comparison app",
     impact:
@@ -272,6 +279,7 @@ export const projects: Project[] = [
   },
   {
     slug: "karfeshha-pos",
+    date: "2022-09",
     title: "Karfeshha POS",
     subtitle: "Realtime POS dashboard for order and kitchen workflows",
     impact:
