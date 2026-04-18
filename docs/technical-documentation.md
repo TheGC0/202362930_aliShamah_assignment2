@@ -15,7 +15,7 @@ This project is a professional personal portfolio for **Ali Shamah**, built acro
 | Language | TypeScript 5 |
 | Styling | Tailwind CSS v4 |
 | Images | `next/image` (optimized, lazy loading) |
-| Fonts | `next/font/google` — Sora + IBM Plex Mono (font-display: swap) |
+| Fonts | CSS font stacks with local fallbacks |
 | Deployment | Vercel |
 
 ---
@@ -62,9 +62,9 @@ This project is a professional personal portfolio for **Ali Shamah**, built acro
 
 | Component | Purpose |
 |-----------|---------|
-| `components/github-stats.tsx` | Fetches GitHub profile stats via REST API with skeleton loading and error fallback |
+| `components/github-stats.tsx` | Fetches GitHub profile stats and featured repositories via REST API with skeleton loading and error fallback |
 | `components/hero-role-rotator.tsx` | Animated text cycling through role titles |
-| `components/theme-toggle.tsx` | Light/dark/system theme switcher with localStorage persistence |
+| `components/theme-toggle.tsx` | Light/dark theme switcher with a system-aware default and localStorage persistence |
 | `components/site-header.tsx` | Sticky navigation with active-section tracking and mobile menu |
 | `components/project-card.tsx` | Project display card with theme-aware logos |
 | `components/skill-group.tsx` | Skill category badge grid |
@@ -113,7 +113,7 @@ Validation runs on "Next" click — form cannot advance until the current step i
 
 | State | Storage | Scope | Description |
 |-------|---------|-------|-------------|
-| Theme | `localStorage` (`ali-shamah-theme`) | Persistent | Light/dark/system — applied before first paint to eliminate flash |
+| Theme | `localStorage` (`ali-shamah-theme`) | Persistent | Light/dark, with a system-aware default applied before first paint to eliminate flash |
 | Visitor name | `localStorage` (`contact-form-name`) | Persistent | Saved from Name field, restored on next visit |
 | Form draft | `localStorage` (`contact-form-draft`) | Persistent | Full form draft (name + email + subject + message) auto-saved on every keystroke; cleared on successful submission |
 | Time greeting | JS / `Date` | Page load | Recomputed at top of each hour if user stays on page |
@@ -135,7 +135,7 @@ Validation runs on "Next" click — form cannot advance until the current step i
 | `requestAnimationFrame` | `scroll-progress.tsx` | Batches scroll updates to animation frames, prevents layout thrashing |
 | `io.unobserve()` after reveal | `layout.tsx` | Observer stops tracking elements after they animate in |
 | `next/image` | All images | Automatic WebP conversion, responsive `srcset`, lazy loading |
-| `next/font` with `display: swap` | `layout.tsx` | Fonts load without blocking render |
+| CSS font stacks | `globals.css` | No external font fetch during build; local fallbacks keep the site readable |
 | `aria-live="off"` on timer | `visitor-timer.tsx` | Prevents screen reader announcement every second |
 | Inline theme init script | `layout.tsx` | Theme applied synchronously before React hydration — no FOUC |
 

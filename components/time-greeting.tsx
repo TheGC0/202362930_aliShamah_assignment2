@@ -15,15 +15,14 @@ function getTimeOfDay(): "morning" | "afternoon" | "evening" {
  * Rendered client-side only to avoid SSR/hydration mismatch.
  */
 export function TimeGreeting() {
-  const [greeting, setGreeting] = useState<string>("");
+  const [greeting, setGreeting] = useState<string>(() => `Good ${getTimeOfDay()},`);
 
   useEffect(() => {
-    setGreeting(`Good ${getTimeOfDay()},`);
-
     // Recalculate at the top of each hour in case the user stays on the page
     const now = new Date();
-    const msUntilNextHour =
-      (60 - now.getMinutes()) * 60_000 - now.getSeconds() * 1000;
+    const nextHour = new Date(now);
+    nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+    const msUntilNextHour = nextHour.getTime() - now.getTime();
 
     const timeout = setTimeout(() => {
       setGreeting(`Good ${getTimeOfDay()},`);

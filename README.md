@@ -8,7 +8,7 @@ Live: https://ali-shamah-portfolio.vercel.app
 - Main page sections: About, Featured Projects, Experience, Skills, Leadership, Contact
 - Dedicated pages: Projects, Project Details, Links Hub, Resume, Contact
 - Dark/light theme toggle with localStorage persistence
-- GitHub live stats via public API + Quotable.io inspirational quotes
+- GitHub live stats + featured repositories via public API + Quotable.io inspirational quotes
 - Project search, category filter, and sort
 - 3-step validated contact form
 - Visitor time-on-page counter
@@ -18,7 +18,7 @@ Live: https://ali-shamah-portfolio.vercel.app
 ## Assignment 3 — Advanced Functionality
 
 ### 1) API Integration
-- **GitHub REST API** (existing, enhanced): Fetches live profile stats (`public_repos`, `followers`, `following`) and repository list — `components/github-stats.tsx`
+- **GitHub REST API** (existing, enhanced): Fetches live profile stats (`public_repos`, `followers`, `following`) and a small featured repository list in parallel — `components/github-stats.tsx`
 - **Quotable.io API** (new): Fetches a random inspirational/technology quote on page load with a ↺ refresh button. Falls back to 4 hardcoded quotes when offline or rate-limited — `components/quote-widget.tsx`
 - Both APIs display user-friendly error states when unavailable.
 
@@ -54,7 +54,7 @@ Live: https://ali-shamah-portfolio.vercel.app
 - **Empty state**: "No projects found" message with guidance when filters return nothing
 
 #### 2) Data Handling
-- **Public API fetch**: GitHub profile stats (`public_repos`, `followers`, `following`) loaded from `https://api.github.com/users/TheGC0` and displayed live on the About section (`components/github-stats.tsx`)
+- **Public API fetch**: GitHub profile stats (`public_repos`, `followers`, `following`) and featured repositories loaded from `https://api.github.com/users/TheGC0` and displayed live on the About section (`components/github-stats.tsx`)
 - **localStorage**: Contact form remembers your name between visits (`components/contact-form.tsx`, key: `contact-form-name`)
 - **Theme preference**: Light/dark mode choice persisted in localStorage (`ali-shamah-theme`)
 
@@ -98,7 +98,7 @@ Live: https://ali-shamah-portfolio.vercel.app
 - Works across mobile, tablet, and desktop.
 
 ### 4) Interactivity
-- Theme toggle (light/dark/system)
+- Theme toggle (light/dark with a system-aware default)
 - Animated role text in hero
 - Smooth section scrolling and active nav state
 - Project search + category filters
@@ -112,7 +112,8 @@ Live: https://ali-shamah-portfolio.vercel.app
 - Next.js (App Router)
 - TypeScript
 - Tailwind CSS v4
-- next/image, next/font
+- next/image
+- CSS font stacks with local fallbacks
 
 ## Project Structure
 ```text
@@ -127,7 +128,7 @@ portfolio/
 |   `-- links/
 |-- components/
 |   |-- contact-form.tsx           3-step wizard with per-step validation + localStorage
-|   |-- github-stats.tsx           GitHub public API fetch with loading/error states
+|   |-- github-stats.tsx           GitHub public API fetch with loading/error states + featured repos
 |   |-- hero-role-rotator.tsx      Animated role text
 |   |-- projects-client.tsx        Search + category filter + sort with results count
 |   |-- quote-widget.tsx           Quotable.io API fetch with fallback + refresh
@@ -142,6 +143,8 @@ portfolio/
 |-- docs/
 |   |-- ai-usage-report.md
 |   |-- technical-documentation.md
+|-- scripts/
+|   `-- build.mjs
 `-- README.md
 ```
 
@@ -169,6 +172,8 @@ npm run lint
 npm run build
 npm run start
 ```
+
+`npm run build` uses a tiny wrapper in `scripts/build.mjs` to disable Next telemetry and keep the production build reliable in restricted environments. The app output is unchanged.
 
 ## Quality and Validation
 - Linting: `npm run lint`

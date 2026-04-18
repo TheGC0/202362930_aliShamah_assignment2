@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Sora } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 
@@ -10,19 +9,6 @@ import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/data/site";
 
 import "./globals.css";
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
 
 const title = `${siteConfig.name} | Software Engineer`;
 const description = siteConfig.description;
@@ -147,7 +133,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${sora.variable} ${ibmPlexMono.variable} antialiased`}>
+      <body className="antialiased">
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
         </Script>

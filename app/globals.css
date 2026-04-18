@@ -3,9 +3,9 @@
 /* Light theme — default and explicit [data-theme="light"] override share one rule block */
 :root,
 :root[data-theme="light"] {
-  /* Font variable fallback (Next.js injects the real value via a utility class at runtime) */
-  --font-sora: "Sora", "Avenir Next", "Segoe UI", sans-serif;
-  --font-ibm-plex-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+  /* Font stack used across the site; the first available family wins. */
+  --font-sans: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
 
   --page-gradient: radial-gradient(circle at 20% 10%, #efefef 0%, #f8f8f8 46%, #e6e6e6 100%);
   --bg: #f3f3f3;
@@ -83,14 +83,14 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-sora), "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 code,
 pre,
 kbd,
 samp {
-  font-family: var(--font-ibm-plex-mono), "SFMono-Regular", Menlo, monospace;
+  font-family: var(--font-mono);
 }
 
 a {

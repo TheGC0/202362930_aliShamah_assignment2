@@ -43,7 +43,7 @@ Used as the primary AI assistant for implementing Assignment 2's interactive fea
 
 - **Contact form enhancement**: Generated the initial structure for field-level validation logic and animated error/success banners. I reviewed the generated code, adjusted the validation rules (email regex, minimum message length), confirmed the localStorage name-save pattern, and verified it matched the existing form styles.
 
-- **GitHub Stats component**: Suggested the pattern for fetching from the GitHub public API with proper loading skeleton and error states. I reviewed the fetch logic, confirmed the cancel flag pattern prevents state updates on unmounted components, and adapted the card layout to match the site's design system.
+- **GitHub Stats component**: Suggested the pattern for fetching GitHub profile data and featured repositories in parallel with proper loading skeleton and error states. I reviewed the fetch logic, confirmed the cancel flag pattern prevents state updates on unmounted components, and adapted the card layout to match the site's design system.
 
 - **Scroll-reveal animations**: Generated the IntersectionObserver script approach and the `.js-scroll` CSS class pattern (progressive enhancement — no flash of invisible content without JS). I verified the threshold value and transition timing worked well with the existing layout, then applied `.reveal` selectively to sections.
 
@@ -126,7 +126,7 @@ Primary AI assistant for implementing Assignment 3's advanced features.
 ### Learning Outcomes — Assignment 3
 - Deeper understanding of Next.js App Router rendering boundaries: `dynamic({ ssr: false })` must be inside a `"use client"` component, not a Server Component.
 - Better grasp of when to use `aria-live` and when to explicitly suppress it (`aria-live="off"`) — accessibility is not just about adding ARIA, it's about not being disruptive.
-- Practical use of `Promise.all` for parallel API calls — fetching profile and repos simultaneously rather than sequentially cut GitHub load time roughly in half.
+- Practical use of `Promise.all` for parallel API calls — fetching profile and repos simultaneously instead of waiting on them one after the other.
 - Understanding that sort + filter composition requires immutable operations (`[...results].sort(...)`) to avoid mutating the memoized source array.
 
 ### Responsible Use & Modifications
